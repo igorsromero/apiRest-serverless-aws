@@ -15,12 +15,27 @@ service: apirest-serverless-aws
 
 plugins:
   - serverless-offline
-# app and org for use with dashboard.serverless.com
-#app: your-app-name
-#org: your-org-name
+  - serverless-dynamodb-local
 
-# You can pin your service to only deploy with a specific Serverless version
-# Check out our docs for more details
+custom:
+  dynamodb:
+    # If you only want to use DynamoDB Local in some stages, declare them here
+    stages:
+      - dev
+    start:
+      port: 8000
+      inMemory: true
+      heapInitial: 200m
+      heapMax: 1g
+      migrate: true
+      seed: true
+      convertEmptyValues: true
+    seed:
+      domain:
+        sources:
+          - table: PACIENTES
+            sources: [./offline/migrations/pacientes-seed.json]
+
 frameworkVersion: "3"
 
 provider:

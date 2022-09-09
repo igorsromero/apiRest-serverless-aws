@@ -4,12 +4,15 @@
   "description": "``` serverless create --template aws-nodejs ```",
   "main": "handler.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "fixtures": "./bin/fixtures"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "faker": "^5.5.3",
+    "serverless-dynamodb-local": "^0.2.40",
     "serverless-offline": "^10.0.0"
   },
   "dependencies": {

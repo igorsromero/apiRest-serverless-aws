@@ -1,35 +1,73 @@
-'use strict';
-
+"use strict";
 const pacientes = [
-  { id: 1, nome: 'João', dataNascimento: '1990-01-01' },
-  { id: 2, nome: 'Maria', dataNascimento: '1990-01-01' },
-  { id: 3, nome: 'José', dataNascimento: '1990-01-01' },
-]
+  { id: 1, nome: "Maria", dataNascimento: "1984-11-01" },
+  { id: 2, nome: "Joao", dataNascimento: "1980-01-16" },
+  { id: 3, nome: "Jose", dataNascimento: "1998-06-06" },
+];
 
-const AWS = require("aws-sdk")
+const AWS = require("aws-sdk");
 const { v4: uuidv4 } = require("uuid");
 
-const dynamoDB = new AWS.DynamoDB.DocumentClient()
-const params = {
-  TableName: "PACIENTES"
+const dynamodbOfflineOptions = {
+  region: "localhost",
+  endpoint: "http://localhost:8000"
 }
 
+const isOffline = () => true
+
+const dynamoDb = isOffline()
+  ? new AWS.DynamoDB.DocumentClient(dynamodbOfflineOptions)
+  : new AWS.DynamoDB.DocumentClient();
+
+const params = {
+  TableName: "PACIENTES",
+};
+
 module.exports.listarPacientes = async (event) => {
+  console.log('teste')
   try {
-    let data = await dynamoDB.scan(params).promise()
+    const queryString = {
+      limit: 5,
+      ...event.queryStringParameters
+    }
+
+    const { limit, next } = queryString
+
+    let localParams = {
+      ...params,
+      Limit: limit
+    }
+
+    if (next) {
+      localParams.ExclusiveStartKey = {
+        paciente_id: next
+      }
+    }
+
+    let data = await dynamoDb.scan(localParams).promise();
+
+    let nextToken = data.LastEvaluatedKey != undefined
+      ? data.LastEvaluatedKey.paciente_id
+      : null;
+
+    const result = {
+      items: data.Items,
+      next_token: nextToken
+    }
 
     return {
       statusCode: 200,
-      body: JSON.stringify(data.Items),
-  }
-  } catch (error) {
+      body: JSON.stringify(result),
+    };
+  } catch (err) {
+    console.log("Error", err);
     return {
-      statusCode: error.statusCode || 500,
+      statusCode: err.statusCode ? err.statusCode : 500,
       body: JSON.stringify({
-        error: error.name || 'Exception',
-        message: error.message || 'Unknown error',
+        error: err.name ? err.name : "Exception",
+        message: err.message ? err.message : "Unknown error",
       }),
-    }
+    };
   }
 };
 
@@ -37,7 +75,7 @@ module.exports.obterPaciente = async (event) => {
   try {
     const { pacienteId } = event.pathParameters;
 
-    const data = await dynamoDB
+    const data = await dynamoDb
       .get({
         ...params,
         Key: {
@@ -90,7 +128,7 @@ module.exports.cadastrarPaciente = async (event) => {
       atualizado_em: timestamp,
     };
 
-    await dynamoDB
+    await dynamoDb
       .put({
         TableName: "PACIENTES",
         Item: paciente,
@@ -112,7 +150,7 @@ module.exports.cadastrarPaciente = async (event) => {
   }
 };
 
-module.exports.atualizarPaciente = async (event) => {  
+module.exports.atualizarPaciente = async (event) => {
   const { pacienteId } = event.pathParameters
 
   try {
@@ -122,14 +160,14 @@ module.exports.atualizarPaciente = async (event) => {
 
     const { nome, data_nascimento, email, telefone } = dados;
 
-    await dynamoDB
+    await dynamoDb
       .update({
         ...params,
         Key: {
           paciente_id: pacienteId
         },
         UpdateExpression:
-          'SET nome = :nome, data_nascimento = :dt, email = :email,' 
+          'SET nome = :nome, data_nascimento = :dt, email = :email,'
           + ' telefone = :telefone, atualizado_em = :atualizado_em',
         ConditionExpression: 'attribute_exists(paciente_id)',
         ExpressionAttributeValues: {
@@ -172,7 +210,7 @@ module.exports.excluirPaciente = async event => {
   const { pacienteId } = event.pathParameters
 
   try {
-    await dynamoDB
+    await dynamoDb
       .delete({
         ...params,
         Key: {
@@ -181,7 +219,7 @@ module.exports.excluirPaciente = async event => {
         ConditionExpression: 'attribute_exists(paciente_id)'
       })
       .promise()
- 
+
     return {
       statusCode: 204
     }
