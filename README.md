@@ -40,3 +40,14 @@ sls deploy -f obterPaciente
 ```
 sls logs -f obterPaciente --tail
 ```
+
+--- 
+
+## Executar serverless localmente
+```
+npm install serverless-offline --save-dev
+
+add to serverless.yml:
+plugins:
+  - serverless-offline
+```

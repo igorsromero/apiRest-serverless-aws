@@ -12,6 +12,9 @@
 # Happy Coding!
 
 service: apirest-serverless-aws
+
+plugins:
+  - serverless-offline
 # app and org for use with dashboard.serverless.com
 #app: your-app-name
 #org: your-org-name
