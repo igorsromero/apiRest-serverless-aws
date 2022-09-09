@@ -25,6 +25,19 @@ module.exports.obterPaciente = async (event) => {
 
   const paciente = pacientes.find(paciente => paciente.id == pacienteId)
 
+  if (!paciente) {
+    return {
+      statusCode: 404,
+      body: JSON.stringify(
+        {
+          message: 'Paciente não encontrado'
+        },
+        null,
+        2
+      ),
+    };
+  }
+
   return {
     statusCode: 200,
     body: JSON.stringify(
