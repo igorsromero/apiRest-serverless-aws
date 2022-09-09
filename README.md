@@ -19,3 +19,24 @@ sls invoke local -f listarPacientes -d '{"teste": "teste"}'
 ```
 sls deploy
 ```
+
+### Deploy de apenas uma função
+```
+sls deploy -f obterPaciente
+```
+
+---
+
+### Endpoints
+```
+- GET /pacientes
+- GET /pacientes/ID
+- POST /pacientes
+- PUT /pacientes/ID
+- DELETE /pacientes/ID
+```
+
+### Obter logs de requisições
+```
+sls logs -f obterPaciente --tail
+```

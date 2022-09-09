@@ -29,3 +29,13 @@ provider:
 functions:
   listarPacientes:
     handler: handler.listarPacientes
+    events:
+      - http:
+          path: pacientes
+          method: get
+  obterPaciente:
+    handler: handler.obterPaciente
+    events:
+      - http:
+          path: pacientes/{pacienteId}
+          method: get
