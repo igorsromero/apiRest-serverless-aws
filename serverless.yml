@@ -21,13 +21,22 @@ plugins:
 
 # You can pin your service to only deploy with a specific Serverless version
 # Check out our docs for more details
-frameworkVersion: '3'
+frameworkVersion: "3"
 
 provider:
   name: aws
   runtime: nodejs12.x
   stage: dev
   region: us-east-1
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:PutItem
+        - dynamodb:DeleteItem
+        - dynamodb:GetItem
+      Resource: arn:aws:dynamodb:us-east-1:621123352874:table/PACIENTES
 
 functions:
   listarPacientes:
