@@ -6,19 +6,31 @@ const pacientes = [
   { id: 3, nome: 'José', dataNascimento: '1990-01-01' },
 ]
 
+const AWS = require("aws-sdk")
+const dynamoDB = new AWS.DynamoDB.DocumentClient()
+const params = {
+  TableName: "PACIENTES"
+}
+
 module.exports.listarPacientes = async (event) => {
-  console.log(event)
-  return {
-    statusCode: 200,
-    body: JSON.stringify(
-      {
-        pacientes
-      },
-      null,
-      2
-    ),
-  };
+  try {
+    let data = await dynamoDB.scan(params).promise()
+
+    return {
+      statusCode: 200,
+      body: JSON.stringify(data),
+  }
+  } catch (error) {
+    return {
+      statusCode: error.statusCode || 500,
+      body: JSON.stringify({
+        error: error.name || 'Exception',
+        message: error.message || 'Unknown error',
+      }),
+    }
+  }
 };
+
 
 module.exports.obterPaciente = async (event) => {
   const { pacienteId } = event.pathParameters
