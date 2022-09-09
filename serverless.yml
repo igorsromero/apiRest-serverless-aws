@@ -64,6 +64,12 @@ functions:
       - http:
           path: pacientes/{pacienteId}
           method: put
+  excluirPaciente:
+    handler: handler.excluirPaciente
+    events:
+      - http:
+          path: pacientes/{pacienteId}
+          method: delete
 resources:
   Resources:
     PacientesTable:
