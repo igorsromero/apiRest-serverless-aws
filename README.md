@@ -51,3 +51,8 @@ add to serverless.yml:
 plugins:
   - serverless-offline
 ```
+
+### 
+```
+aws dynamodb batch-write-item --request-items file://pacientes.json
+```
